@@ -1,16 +1,18 @@
-FROM nvidia/cuda:11.1.1-devel AS builder
+FROM nvcr.io/nvidia/l4t-base:r32.5.0 AS builder
 
-WORKDIR /build
+RUN apt update && apt install -y build-essential
+COPY install_cuda.sh /tmp/
+RUN chmod +x /tmp/install_cuda.sh && /tmp/install_cuda.sh
 
-COPY . /build/
+WORKDIR /gpu-burn
+COPY . .
 
 RUN make
 
-FROM nvidia/cuda:11.1.1-runtime
+ENTRYPOINT ["/bin/bash"]
 
-COPY --from=builder /build/gpu_burn /app/
-COPY --from=builder /build/compare.ptx /app/
+#WORKDIR /usr/local/cuda-10.2/samples/0_Simple/matrixMul
 
-WORKDIR /app
+#RUN make
 
-CMD ["./gpu_burn", "60"]
+#ENTRYPOINT ["/usr/local/cuda-10.2/samples/0_Simple/matrixMul/matrixMul"]
